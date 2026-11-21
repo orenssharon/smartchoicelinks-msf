@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Should You Recruit PLACEHOLDER: New Character Name in Marvel Strike Force?</title>
+  <style>
+    .msf-wrap { font-family: system-ui, -apple-system, sans-serif; max-width: 860px; margin: 0 auto; padding: 20px; color: #111827; line-height: 1.6; }
+    .msf-placeholder { display: inline-block; background: #fef3c7; color: #92400e; padding: 2px 8px; border-radius: 4px; font-size: 0.85rem; }
+    .msf-box, .msf-card, .msf-verdict { border: 1px solid #d1d5db; border-radius: 8px; padding: 16px; margin: 16px 0; background: #f9fafb; }
+    .msf-field { display: grid; gap: 6px; margin-bottom: 12px; }
+    .msf-field input { max-width: 220px; padding: 8px; border: 1px solid #9ca3af; border-radius: 6px; }
+    .msf-results { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; margin-top: 12px; }
+    .msf-stat { background: #ffffff; border: 1px solid #e5e7eb; border-radius: 6px; padding: 12px; }
+    .msf-faq { background: #ffffff; border: 1px solid #e5e7eb; border-radius: 6px; padding: 10px 14px; margin: 8px 0; }
+    .msf-links { display: flex; flex-wrap: wrap; gap: 12px; list-style: none; padding: 0; }
+  </style>
+</head>
+<body>
+  <article class="msf-wrap" data-slug="should-you-recruit-placeholder-character" data-updated="2026-11-21T12:35:38.202Z">
+    <p class="msf-meta"><small>Generated snapshot (UTC): 2026-11-21T12:35:38.202Z</small></p>
+    <h1>Should You Recruit PLACEHOLDER: New Character Name in Marvel Strike Force?</h1>
+    <section class="msf-box" aria-label="Shard Calculator">
+      <h2>Shard Unlock &amp; Offer Savings Calculator</h2>
+      <div class="msf-field">
+        <label for="msf-req">Shards Required <span class="msf-placeholder">PLACEHOLDER: Unlock Shards</span></label>
+        <input type="number" min="0" id="msf-req" value="0" />
+      </div>
+      <div class="msf-field">
+        <label for="msf-owned">Current Shards Owned</label>
+        <input type="number" min="0" id="msf-owned" value="0" />
+      </div>
+      <h3>Daily Shard Sources</h3>
+<div class="msf-field"><label for="msf-src-0"><span class="msf-placeholder">PLACEHOLDER: Daily Source 1</span></label><input type="number" min="0" step="0.5" class="msf-daily-input" id="msf-src-0" value="0" /></div>
+<div class="msf-field"><label for="msf-src-1"><span class="msf-placeholder">PLACEHOLDER: Daily Source 2</span></label><input type="number" min="0" step="0.5" class="msf-daily-input" id="msf-src-1" value="0" /></div>
+      <div class="msf-field">
+        <label for="msf-offer">PLACEHOLDER: Offer or Orb Name - Shards per Purchase</label>
+        <input type="number" min="0" id="msf-offer" value="0" />
+        <small><span class="msf-placeholder">PLACEHOLDER: Price</span></small>
+      </div>
+      <div class="msf-results">
+        <div class="msf-stat"><strong>Remaining Shards</strong><div id="msf-out-rem">0</div></div>
+        <div class="msf-stat"><strong>Daily Shards</strong><div id="msf-out-daily">0</div></div>
+        <div class="msf-stat"><strong>F2P Days to Unlock</strong><div id="msf-out-days">N/A</div></div>
+        <div class="msf-stat"><strong>Days Saved (1 Offer/Orb)</strong><div id="msf-out-saved">N/A</div></div>
+      </div>
+    </section>
+    <section><h2>What PLACEHOLDER: New Character Name Does</h2><ul><li>PLACEHOLDER: Character abilities, role, and combat mechanics.</li></ul></section>
+    <section><h2>Best Teams</h2><div class="msf-card"><h3>PLACEHOLDER: Best Team Name</h3><p><strong>Modes:</strong> PLACEHOLDER: Game Modes</p><p>PLACEHOLDER: Team synergy notes.</p></div></section>
+    <section class="msf-verdict"><h2>Recommendation: PLACEHOLDER: Recruit Now or Wait</h2><p>PLACEHOLDER: Recommendation reasoning.</p></section>
+    <section><h2>Frequently Asked Questions</h2><details class="msf-faq"><summary>PLACEHOLDER: How many shards are needed to unlock this character?</summary><p>PLACEHOLDER: Verified unlock shard count.</p></details></section>
+    <nav aria-label="MSF Tools">
+      <h2>Marvel Strike Force Tools &amp; Hub</h2>
+      <ul class="msf-links">
+        <li><a href="/5-essential-msf-calculators/">5 Essential MSF Calculators</a></li>
+        <li><a href="/codes/">MSF Promo Codes</a></li>
+        <li><a href="/g21-calculator/">G21 Calculator</a></li>
+        <li><a href="/gold-calculator/">Gold Calculator</a></li>
+        <li><a href="/turn-1-calculator/">Turn-1 Calculator</a></li>
+        <li><a href="/meta-hub/">Meta Hub</a></li>
+      </ul>
+    </nav>
+  </article>
+  <script>
+    (function () {
+      var root = document.currentScript.closest(".msf-wrap");
+      var reqEl = root.querySelector("#msf-req");
+      var ownedEl = root.querySelector("#msf-owned");
+      var offerEl = root.querySelector("#msf-offer");
+      var dailyEls = Array.prototype.slice.call(root.querySelectorAll(".msf-daily-input"));
+      var outRem = root.querySelector("#msf-out-rem");
+      var outDaily = root.querySelector("#msf-out-daily");
+      var outDays = root.querySelector("#msf-out-days");
+      var outSaved = root.querySelector("#msf-out-saved");
+      function updateCalc() {
+        var req = Math.max(0, Number(reqEl.value) || 0);
+        var owned = Math.max(0, Number(ownedEl.value) || 0);
+        var rem = Math.max(0, req - owned);
+        var daily = dailyEls.reduce(function (acc, el) { return acc + Math.max(0, Number(el.value) || 0); }, 0);
+        var offerGain = Math.max(0, Number(offerEl.value) || 0);
+        outRem.textContent = String(rem);
+        outDaily.textContent = String(daily);
+        if (rem === 0) { outDays.textContent = "0 days"; outSaved.textContent = "0 days"; return; }
+        if (daily > 0) {
+          var days = Math.ceil(rem / daily);
+          var remAfter = Math.max(0, rem - offerGain);
+          var daysAfter = Math.ceil(remAfter / daily);
+          var saved = Math.max(0, days - daysAfter);
+          outDays.textContent = days + (days === 1 ? " day" : " days");
+          outSaved.textContent = saved + (saved === 1 ? " day" : " days");
+        } else {
+          outDays.textContent = "Set daily shards (> 0)";
+          outSaved.textContent = "Set daily shards (> 0)";
+        }
+      }
+      [reqEl, ownedEl, offerEl].concat(dailyEls).forEach(function (el) { el.addEventListener("input", updateCalc); });
+      updateCalc();
+    })();
+  </script>
+</body>
+</html>
