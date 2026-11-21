@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-11-21T14:07:13.924Z",
+  "updatedAt": "2026-11-21T14:13:28.576Z",
   "externalSources": [
     {
       "name": "Scopely MSF News & Updates",
@@ -41,11 +41,13 @@
     },
     {
       "name": "Reddit r/MarvelStrikeForce New Releases Feed",
+      "url": "https://www.reddit.com/r/MarvelStrikeForce/search.json?q=new+character&sort=new&restrict_sr=on&limit=10",
       "status": "http-403",
       "items": []
     },
     {
       "name": "Reddit r/MarvelStrikeForce Hot Feed",
+      "url": "https://www.reddit.com/r/MarvelStrikeForce/hot.json?limit=15",
       "status": "http-403",
       "items": []
     }
@@ -54,7 +56,7 @@
     {
       "name": "Sauron",
       "slug": "should-you-recruit-sauron",
-      "updatedAt": "2026-11-21T14:07:13.924Z",
+      "updatedAt": "2026-11-21T14:13:28.576Z",
       "htmlPath": "public/characters/should-you-recruit-sauron/index.html"
     }
   ]
