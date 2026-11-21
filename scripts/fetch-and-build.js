@@ -162,7 +162,7 @@ async function querySingleEndpoint(ep) {
     clearTimeout(timer);
 
     if (!res.ok) {
-      return { name: ep.name || ep.url, status: 'http-' + res.status, items: [] };
+      return { name: ep.name || ep.url, url: ep.url, status: 'http-' + res.status, items: [] };
     }
 
     const contentType = (res.headers.get('content-type') || '').toLowerCase();
@@ -207,6 +207,46 @@ async function queryExternalEndpoints(endpoints) {
     results.push(res);
   }
   return results;
+}
+
+function printBuildSummary(externalResults, manifest, updatedAtIso) {
+  console.log('====================================================');
+  console.log('MSF BUILD SUMMARY (UTC): ' + updatedAtIso);
+  console.log('====================================================');
+  console.log('External Sources Checked: ' + externalResults.length);
+
+  if (externalResults.length === 0) {
+    console.log('  - No external endpoints configured in data/sources.json');
+  } else {
+    for (let i = 0; i < externalResults.length; i++) {
+      const src = externalResults[i];
+      const count =
+        typeof src.postsCount === 'number'
+          ? src.postsCount
+          : typeof src.itemsCount === 'number'
+          ? src.itemsCount
+          : Array.isArray(src.items)
+          ? src.items.length
+          : 0;
+
+      console.log('  [' + (i + 1) + '] ' + src.name);
+      console.log('      Status: ' + src.status + ' | Extracted Items: ' + count);
+
+      if (Array.isArray(src.items) && src.items.length > 0) {
+        const previewLimit = Math.min(2, src.items.length);
+        for (let j = 0; j < previewLimit; j++) {
+          console.log('      Sample ' + (j + 1) + ': ' + src.items[j].title);
+        }
+      }
+    }
+  }
+
+  console.log('----------------------------------------------------');
+  console.log('Character Pages Built: ' + manifest.length);
+  for (let k = 0; k < manifest.length; k++) {
+    console.log('  - ' + manifest[k].name + ' -> ' + manifest[k].htmlPath);
+  }
+  console.log('====================================================');
 }
 
 function tag(tagName, attrs, innerHtml) {
@@ -492,6 +532,8 @@ async function main() {
     ),
     'utf8'
   );
+
+  printBuildSummary(externalResults, manifest, updatedAtIso);
 }
 
 main().catch(function (err) {
