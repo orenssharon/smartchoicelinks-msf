@@ -1,5 +1,8 @@
 name: Update MSF Character HTML
 
+permissions:
+  contents: write
+
 on:
   schedule:
     - cron: "0 */12 * * *"
@@ -31,6 +34,6 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add public/characters/
+          git add -f public/characters/
           git diff --staged --quiet || git commit -m "chore: update MSF character HTML snapshots"
           git push
