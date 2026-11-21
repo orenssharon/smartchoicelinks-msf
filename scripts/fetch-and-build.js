@@ -177,6 +177,7 @@ function renderCharacterHtml(charItem, updatedAtIso) {
     })
     .join('\n');
 
+  const blogHeadline = 'Marvel Strike Force Character Guides ' + amp + 'amp; Shard Calculators';
   const h2Calc = 'Shard Unlock ' + amp + 'amp; Offer Savings Calculator';
   const h2Tools = 'Marvel Strike Force Tools ' + amp + 'amp; Hub';
 
@@ -188,11 +189,14 @@ function renderCharacterHtml(charItem, updatedAtIso) {
     '  <meta name=' + Q + 'viewport' + Q + ' content=' + Q + 'width=device-width, initial-scale=1.0' + Q + ' />\n' +
     '  <title>' + escapeHtml(title) + '</title>\n' +
     '  <style>\n' +
-    '    .msf-wrap { font-family: system-ui, -apple-system, sans-serif; max-width: 860px; margin: 0 auto; padding: 20px; color: #111827; line-height: 1.6; }\n' +
+    '    .msf-wrap { font-family: system-ui, -apple-system, sans-serif; max-width: 900px; width: 100%; margin: 0 auto; padding: 20px; color: #111827; line-height: 1.6; direction: ltr; text-align: left; float: none; box-sizing: border-box; }\n' +
+    '    .msf-wrap *, .msf-wrap *::before, .msf-wrap *::after { box-sizing: border-box; }\n' +
+    '    .msf-site-title { font-weight: 700; font-size: 0.95rem; text-transform: uppercase; letter-spacing: 0.04em; color: #4b5563; margin: 0 0 6px 0; }\n' +
+    '    .msf-meta { margin: 0 0 12px 0; color: #6b7280; }\n' +
     '    .msf-placeholder { display: inline-block; background: #fef3c7; color: #92400e; padding: 2px 8px; border-radius: 4px; font-size: 0.85rem; }\n' +
     '    .msf-box, .msf-card, .msf-verdict { border: 1px solid #d1d5db; border-radius: 8px; padding: 16px; margin: 16px 0; background: #f9fafb; }\n' +
     '    .msf-field { display: grid; gap: 6px; margin-bottom: 12px; }\n' +
-    '    .msf-field input { max-width: 220px; padding: 8px; border: 1px solid #9ca3af; border-radius: 6px; }\n' +
+    '    .msf-field input { max-width: 240px; width: 100%; padding: 8px; border: 1px solid #9ca3af; border-radius: 6px; }\n' +
     '    .msf-results { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; margin-top: 12px; }\n' +
     '    .msf-stat { background: #ffffff; border: 1px solid #e5e7eb; border-radius: 6px; padding: 12px; }\n' +
     '    .msf-faq { background: #ffffff; border: 1px solid #e5e7eb; border-radius: 6px; padding: 10px 14px; margin: 8px 0; }\n' +
@@ -201,6 +205,7 @@ function renderCharacterHtml(charItem, updatedAtIso) {
     '</head>\n' +
     '<body>\n' +
     '  <article class=' + Q + 'msf-wrap' + Q + ' data-slug=' + Q + escapeHtml(slug) + Q + ' data-updated=' + Q + escapeHtml(updatedAtIso) + Q + '>\n' +
+    '    <p class=' + Q + 'msf-site-title' + Q + '>' + blogHeadline + '</p>\n' +
     '    <p class=' + Q + 'msf-meta' + Q + '><small>Generated snapshot (UTC): ' + escapeHtml(updatedAtIso) + '</small></p>\n' +
     '    <h1>' + escapeHtml(title) + '</h1>\n' +
     '    <section class=' + Q + 'msf-box' + Q + ' aria-label=' + Q + 'Shard Calculator' + Q + '>\n' +
@@ -271,64 +276,4 @@ function renderCharacterHtml(charItem, updatedAtIso) {
     '          outDays.textContent = days + (days === 1 ? ' + Q + ' day' + Q + ' : ' + Q + ' days' + Q + ');\n' +
     '          outSaved.textContent = saved + (saved === 1 ? ' + Q + ' day' + Q + ' : ' + Q + ' days' + Q + ');\n' +
     '        } else {\n' +
-    '          outDays.textContent = ' + Q + 'Set daily shards (> 0)' + Q + ';\n' +
-    '          outSaved.textContent = ' + Q + 'Set daily shards (> 0)' + Q + ';\n' +
-    '        }\n' +
-    '      }\n' +
-    '      [reqEl, ownedEl, offerEl].concat(dailyEls).forEach(function (el) { el.addEventListener(' + Q + 'input' + Q + ', updateCalc); });\n' +
-    '      updateCalc();\n' +
-    '    })();\n' +
-    '  </script>\n' +
-    '</body>\n' +
-    '</html>'
-  );
-}
-
-async function main() {
-  const rawSources = fs.existsSync(SOURCES_FILE)
-    ? JSON.parse(fs.readFileSync(SOURCES_FILE, 'utf8'))
-    : { candidateCharacters: [], externalEndpoints: [] };
-
-  const externalResults = await queryExternalEndpoints(rawSources.externalEndpoints);
-  const updatedAtIso = new Date().toISOString();
-  const characters = Array.isArray(rawSources.candidateCharacters) ? rawSources.candidateCharacters : [];
-
-  fs.mkdirSync(PUBLIC_CHARS_DIR, { recursive: true });
-  const manifest = [];
-
-  for (let i = 0; i < characters.length; i++) {
-    const charItem = characters[i];
-    const slug = slugify(charItem.slug || charItem.name);
-    const charDir = path.join(PUBLIC_CHARS_DIR, slug);
-    fs.mkdirSync(charDir, { recursive: true });
-
-    const html = renderCharacterHtml(charItem, updatedAtIso);
-    fs.writeFileSync(path.join(charDir, 'index.html'), html, 'utf8');
-
-    manifest.push({
-      name: charItem.name || 'PLACEHOLDER: Character Name',
-      slug: slug,
-      updatedAt: updatedAtIso,
-      htmlPath: 'public/characters/' + slug + '/index.html'
-    });
-  }
-
-  fs.writeFileSync(
-    path.join(PUBLIC_CHARS_DIR, 'manifest.json'),
-    JSON.stringify(
-      {
-        updatedAt: updatedAtIso,
-        externalSourcesChecked: externalResults.length,
-        characters: manifest
-      },
-      null,
-      2
-    ),
-    'utf8'
-  );
-}
-
-main().catch(function (err) {
-  console.error(err);
-  process.exit(1);
-});
+    '          outDays.textContent
