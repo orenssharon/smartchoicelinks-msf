@@ -1,50 +1,69 @@
 {
   "candidateCharacters": [
     {
-      "name": "PLACEHOLDER: New Character Name",
-      "slug": "should-you-recruit-placeholder-character",
+      "name": "Sauron",
+      "slug": "should-you-recruit-sauron",
       "shardsRequired": null,
       "dailySources": [
         {
-          "label": "PLACEHOLDER: Daily Source 1",
+          "label": "Mutant Hunger Milestone (F2P 1-Yellow-Star Path)",
           "defaultDailyShards": 0
         },
         {
-          "label": "PLACEHOLDER: Daily Source 2",
+          "label": "Savage Land Pocket Dimension & Event Drops",
+          "defaultDailyShards": 0
+        },
+        {
+          "label": "PLACEHOLDER: Additional Daily Source (e.g. Store / Orb)",
           "defaultDailyShards": 0
         }
       ],
       "offerOrOrb": {
-        "label": "PLACEHOLDER: Offer or Orb Name",
+        "label": "Sauron Store Offers & Orbs",
         "shardsPerPurchase": null,
-        "priceLabel": "PLACEHOLDER: Price"
+        "priceLabel": "PLACEHOLDER: Offer / Orb Price (Personalized Offer Chains)"
       },
       "whatCharacterDoes": [
-        "PLACEHOLDER: Character abilities, role, and combat mechanics."
+        "Sauron enters Marvel Strike Force as part of the Savage Land squad alongside Ka-Zar and Cyclops (Mighty).",
+        "Gains 30% increased damage against enemies with Bleed (per Savage Land Pocket Dimension combat rules/mods).",
+        "PLACEHOLDER: Verify full kit abilities, traits, passive/special/ultimate mechanics, and base stats."
       ],
       "bestTeams": [
         {
-          "teamName": "PLACEHOLDER: Best Team Name",
-          "gameModes": "PLACEHOLDER: Game Modes",
-          "notes": "PLACEHOLDER: Team synergy notes."
+          "teamName": "Savage Land (with Ka-Zar, Cyclops (Mighty), Rogue, and X-23)",
+          "gameModes": "Alliance War & Savage Land Pocket Dimension",
+          "notes": "Leverages War rules, Savage Land Pocket Dimension bonuses, Bleed synergy for Sauron, assist chaining with Ka-Zar, and ability energy generation on kills from Cyclops (Mighty)."
+        },
+        {
+          "teamName": "PLACEHOLDER: Secondary / Hybrid Team",
+          "gameModes": "PLACEHOLDER: War / Crucible / Raids / Arena",
+          "notes": "PLACEHOLDER: Verify optimal slot replacements and synergy."
         }
       ],
       "recommendation": {
-        "verdict": "PLACEHOLDER: Recruit Now or Wait",
-        "summary": "PLACEHOLDER: Recommendation reasoning."
+        "verdict": "Unlock Free via Mutant Hunger First; Evaluate Offers by Roster Goals",
+        "summary": "Because Sauron has a free 1-Yellow-Star unlock path through the Mutant Hunger milestone and ties directly into the Savage Land team and Pocket Dimension, F2P players can start with the milestone path while War-focused players weigh personalized store offers against upcoming late-November/December events (including Doctor Doom / Doomsday Incursion)."
       },
       "faq": [
         {
-          "question": "PLACEHOLDER: How many shards are needed to unlock this character?",
-          "answer": "PLACEHOLDER: Verified unlock shard count."
+          "question": "How can I unlock Sauron in Marvel Strike Force?",
+          "answer": "Sauron launched in Store offers and via the Mutant Hunger milestone (which grants a 1-Yellow-Star free unlock path alongside Ka-Zar and Cyclops (Mighty)). PLACEHOLDER: Confirm exact shard count required for unlock."
+        },
+        {
+          "question": "Which team uses Sauron best?",
+          "answer": "Sauron is featured with the Savage Land squad (alongside Ka-Zar, Cyclops (Mighty), Rogue, and X-23) in Alliance War and the Savage Land Pocket Dimension."
+        },
+        {
+          "question": "Should I buy Sauron offers or wait?",
+          "answer": "F2P players can progress through Mutant Hunger and Pocket Dimension first, while players pushing War or chasing higher stars should compare offer shard yields against their roster priorities. PLACEHOLDER: Insert exact shard-per-offer calculation once verified."
         }
       ]
     }
   ],
   "externalEndpoints": [
     {
-      "name": "PLACEHOLDER: External MSF Data Endpoint",
-      "url": ""
+      "name": "Marvel Strike Force News & Updates",
+      "url": "https://marvelstrikeforce.com/en/updates"
     }
   ]
 }
