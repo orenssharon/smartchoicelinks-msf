@@ -62,8 +62,34 @@
   ],
   "externalEndpoints": [
     {
-      "name": "Marvel Strike Force News & Updates",
-      "url": "https://marvelstrikeforce.com/en/updates"
+      "name": "Scopely MSF News & Updates",
+      "url": "https://marvelstrikeforce.com/en/updates",
+      "type": "html-news"
+    },
+    {
+      "name": "Scopely MSF Characters Directory",
+      "url": "https://marvelstrikeforce.com/characters",
+      "type": "html-roster"
+    },
+    {
+      "name": "MSF Base News",
+      "url": "https://www.msfbase.com/news/",
+      "type": "html-news"
+    },
+    {
+      "name": "Scopely MSF Help Center - Unlock Characters",
+      "url": "https://scopely.helpshift.com/hc/en/46-marvel-strike-force/faq/5883-how-do-i-unlock-characters/",
+      "type": "html-article"
+    },
+    {
+      "name": "Reddit r/MarvelStrikeForce New Releases Feed",
+      "url": "https://www.reddit.com/r/MarvelStrikeForce/search.json?q=new+character&sort=new&restrict_sr=on&limit=10",
+      "type": "reddit-json"
+    },
+    {
+      "name": "Reddit r/MarvelStrikeForce Hot Feed",
+      "url": "https://www.reddit.com/r/MarvelStrikeForce/hot.json?limit=15",
+      "type": "reddit-json"
     }
   ]
 }
