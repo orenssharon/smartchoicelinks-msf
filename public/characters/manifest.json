@@ -1,11 +1,60 @@
 {
-  "updatedAt": "2026-11-21T14:04:57.561Z",
-  "externalSourcesChecked": 4,
+  "updatedAt": "2026-11-21T14:05:52.394Z",
+  "externalSources": [
+    {
+      "name": "Scopely MSF News & Updates",
+      "url": "https://marvelstrikeforce.com/en/updates",
+      "status": "ok-html",
+      "itemsCount": 0,
+      "items": []
+    },
+    {
+      "name": "Scopely MSF Characters Directory",
+      "url": "https://marvelstrikeforce.com/characters",
+      "status": "ok-html",
+      "itemsCount": 0,
+      "items": []
+    },
+    {
+      "name": "MSF Base News",
+      "url": "https://www.msfbase.com/news/",
+      "status": "ok-html",
+      "itemsCount": 1,
+      "items": [
+        {
+          "title": "Characters",
+          "url": "https://www.msfbase.com/characters/"
+        }
+      ]
+    },
+    {
+      "name": "Scopely MSF Help Center - Unlock Characters",
+      "url": "https://scopely.helpshift.com/hc/en/46-marvel-strike-force/faq/5883-how-do-i-unlock-characters/",
+      "status": "ok-html",
+      "itemsCount": 1,
+      "items": [
+        {
+          "title": "Game Characters",
+          "url": ""
+        }
+      ]
+    },
+    {
+      "name": "Reddit r/MarvelStrikeForce New Releases Feed",
+      "status": "http-403",
+      "items": []
+    },
+    {
+      "name": "Reddit r/MarvelStrikeForce Hot Feed",
+      "status": "http-403",
+      "items": []
+    }
+  ],
   "characters": [
     {
       "name": "Sauron",
       "slug": "should-you-recruit-sauron",
-      "updatedAt": "2026-11-21T14:04:57.561Z",
+      "updatedAt": "2026-11-21T14:05:52.394Z",
       "htmlPath": "public/characters/should-you-recruit-sauron/index.html"
     }
   ]
