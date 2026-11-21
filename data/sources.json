@@ -1,0 +1,50 @@
+{
+  "candidateCharacters": [
+    {
+      "name": "PLACEHOLDER: New Character Name",
+      "slug": "should-you-recruit-placeholder-character",
+      "shardsRequired": null,
+      "dailySources": [
+        {
+          "label": "PLACEHOLDER: Daily Source 1",
+          "defaultDailyShards": 0
+        },
+        {
+          "label": "PLACEHOLDER: Daily Source 2",
+          "defaultDailyShards": 0
+        }
+      ],
+      "offerOrOrb": {
+        "label": "PLACEHOLDER: Offer or Orb Name",
+        "shardsPerPurchase": null,
+        "priceLabel": "PLACEHOLDER: Price"
+      },
+      "whatCharacterDoes": [
+        "PLACEHOLDER: Character abilities, role, and combat mechanics."
+      ],
+      "bestTeams": [
+        {
+          "teamName": "PLACEHOLDER: Best Team Name",
+          "gameModes": "PLACEHOLDER: Game Modes",
+          "notes": "PLACEHOLDER: Team synergy notes."
+        }
+      ],
+      "recommendation": {
+        "verdict": "PLACEHOLDER: Recruit Now or Wait",
+        "summary": "PLACEHOLDER: Recommendation reasoning."
+      },
+      "faq": [
+        {
+          "question": "PLACEHOLDER: How many shards are needed to unlock this character?",
+          "answer": "PLACEHOLDER: Verified unlock shard count."
+        }
+      ]
+    }
+  ],
+  "externalEndpoints": [
+    {
+      "name": "PLACEHOLDER: External MSF Data Endpoint",
+      "url": ""
+    }
+  ]
+}
