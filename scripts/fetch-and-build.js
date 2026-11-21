@@ -67,34 +67,146 @@ function slugify(text) {
   return out || 'placeholder-character';
 }
 
-async function queryExternalEndpoints(endpoints) {
-  const collected = [];
-  if (!Array.isArray(endpoints)) return collected;
-
-  for (let i = 0; i < endpoints.length; i++) {
-    const ep = endpoints[i];
-    if (!ep || !ep.url || ep.url.indexOf('https://') !== 0) continue;
-    try {
-      const controller = new AbortController();
-      const timer = setTimeout(function () {
-        controller.abort();
-      }, 10000);
-      const res = await fetch(ep.url, { signal: controller.signal });
-      clearTimeout(timer);
-      if (!res.ok) continue;
-      const contentType = res.headers.get('content-type') || '';
-      if (contentType.indexOf('application/json') !== -1) {
-        const json = await res.json();
-        collected.push({ source: ep.name || ep.url, data: json });
-      } else {
-        const text = await res.text();
-        collected.push({ source: ep.name || ep.url, snippetLength: text.length });
-      }
-    } catch (err) {
-      console.warn('Source fetch skipped:', ep.url, err.message);
+function stripTags(htmlChunk) {
+  let out = '';
+  let insideTag = false;
+  for (let i = 0; i < htmlChunk.length; i++) {
+    const c = htmlChunk[i];
+    if (c === '<') {
+      insideTag = true;
+      out += ' ';
+    } else if (c === '>') {
+      insideTag = false;
+    } else if (!insideTag) {
+      out += c;
     }
   }
-  return collected;
+  return out.replace(/\s+/g, ' ').trim();
+}
+
+function extractLinksAndTitles(htmlText, baseUrl) {
+  const items = [];
+  const anchorRegex = /<a\b[^>]*>([\s\S]*?)<\/a>/gi;
+  let match;
+  let count = 0;
+  while ((match = anchorRegex.exec(htmlText)) !== null && count < 40) {
+    const fullTag = match[0];
+    const text = stripTags(match[1]);
+    if (!text || text.length < 3 || text.length > 140) continue;
+
+    const hrefMatch = /href\s*=\s*["']([^"']+)["']/i.exec(fullTag);
+    let href = hrefMatch ? hrefMatch[1] : '';
+    if (href && href.indexOf('/') === 0) {
+      try {
+        href = new URL(href, baseUrl).toString();
+      } catch (e) {
+        // keep relative href if URL parsing fails
+      }
+    }
+
+    const lower = text.toLowerCase();
+    const isRelevant =
+      lower.indexOf('character') !== -1 ||
+      lower.indexOf('unlock') !== -1 ||
+      lower.indexOf('shards') !== -1 ||
+      lower.indexOf('update') !== -1 ||
+      lower.indexOf('release') !== -1 ||
+      lower.indexOf('event') !== -1 ||
+      lower.indexOf('war') !== -1 ||
+      lower.indexOf('dimension') !== -1 ||
+      lower.indexOf('sauron') !== -1;
+
+    if (isRelevant) {
+      items.push({ title: text, url: href });
+      count++;
+    }
+  }
+  return items;
+}
+
+function parseRedditJson(jsonObj) {
+  const posts = [];
+  const children = jsonObj && jsonObj.data && Array.isArray(jsonObj.data.children)
+    ? jsonObj.data.children
+    : [];
+  for (let i = 0; i < children.length; i++) {
+    const d = children[i] && children[i].data ? children[i].data : null;
+    if (!d || !d.title) continue;
+    posts.push({
+      title: String(d.title).trim(),
+      url: d.permalink ? 'https://www.reddit.com' + d.permalink : '',
+      flair: d.link_flair_text ? String(d.link_flair_text) : '',
+      createdUtc: d.created_utc || null
+    });
+  }
+  return posts;
+}
+
+async function querySingleEndpoint(ep) {
+  if (!ep || !ep.url || ep.url.indexOf('https://') !== 0) {
+    return { name: ep && ep.name ? ep.name : 'PLACEHOLDER: Endpoint', status: 'skipped-invalid-url', items: [] };
+  }
+
+  const controller = new AbortController();
+  const timer = setTimeout(function () {
+    controller.abort();
+  }, 12000);
+
+  try {
+    const res = await fetch(ep.url, {
+      signal: controller.signal,
+      headers: {
+        'User-Agent': 'SmartChoiceLinks-MSF-Bot/1.0 (+https://smartchoicelinks.com)'
+      }
+    });
+    clearTimeout(timer);
+
+    if (!res.ok) {
+      return { name: ep.name || ep.url, status: 'http-' + res.status, items: [] };
+    }
+
+    const contentType = (res.headers.get('content-type') || '').toLowerCase();
+    if (contentType.indexOf('json') !== -1 || ep.type === 'reddit-json' || ep.type === 'json') {
+      const jsonData = await res.json();
+      const parsedPosts = ep.type === 'reddit-json' ? parseRedditJson(jsonData) : [];
+      return {
+        name: ep.name || ep.url,
+        url: ep.url,
+        status: 'ok-json',
+        postsCount: parsedPosts.length,
+        items: parsedPosts.slice(0, 15)
+      };
+    }
+
+    const htmlText = await res.text();
+    const extracted = extractLinksAndTitles(htmlText, ep.url);
+    return {
+      name: ep.name || ep.url,
+      url: ep.url,
+      status: 'ok-html',
+      itemsCount: extracted.length,
+      items: extracted.slice(0, 20)
+    };
+  } catch (err) {
+    clearTimeout(timer);
+    return {
+      name: ep.name || ep.url,
+      url: ep.url,
+      status: 'error: ' + (err && err.message ? err.message : 'fetch failed'),
+      items: []
+    };
+  }
+}
+
+async function queryExternalEndpoints(endpoints) {
+  const results = [];
+  if (!Array.isArray(endpoints)) return results;
+
+  for (let i = 0; i < endpoints.length; i++) {
+    const res = await querySingleEndpoint(endpoints[i]);
+    results.push(res);
+  }
+  return results;
 }
 
 function tag(tagName, attrs, innerHtml) {
@@ -372,7 +484,7 @@ async function main() {
     JSON.stringify(
       {
         updatedAt: updatedAtIso,
-        externalSourcesChecked: externalResults.length,
+        externalSources: externalResults,
         characters: manifest
       },
       null,
