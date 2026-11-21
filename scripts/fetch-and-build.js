@@ -3,6 +3,7 @@ const path = require('path');
 
 const ROOT_DIR = path.join(__dirname, '..');
 const SOURCES_FILE = path.join(ROOT_DIR, 'data', 'sources.json');
+const DISCOVERED_FILE = path.join(ROOT_DIR, 'data', 'discovered-characters.json');
 const PUBLIC_CHARS_DIR = path.join(ROOT_DIR, 'public', 'characters');
 
 function ch(code) {
@@ -84,16 +85,43 @@ function stripTags(htmlChunk) {
   return out.replace(/\s+/g, ' ').trim();
 }
 
+function isRelevantCandidateText(text) {
+  const lower = String(text || '').toLowerCase();
+  if (lower.length < 4 || lower.length > 140) return false;
+  return (
+    lower.indexOf('character') !== -1 ||
+    lower.indexOf('unlock') !== -1 ||
+    lower.indexOf('shards') !== -1 ||
+    lower.indexOf('update') !== -1 ||
+    lower.indexOf('release') !== -1 ||
+    lower.indexOf('event') !== -1 ||
+    lower.indexOf('war') !== -1 ||
+    lower.indexOf('dimension') !== -1 ||
+    lower.indexOf('sauron') !== -1 ||
+    lower.indexOf('recruit') !== -1 ||
+    lower.indexOf('milestone') !== -1
+  );
+}
+
 function extractLinksAndTitles(htmlText, baseUrl) {
   const items = [];
+  const seenTitles = {};
+
+  function pushUnique(title, url) {
+    const clean = String(title || '').replace(/\s+/g, ' ').trim();
+    if (!isRelevantCandidateText(clean)) return;
+    const key = clean.toLowerCase();
+    if (seenTitles[key]) return;
+    seenTitles[key] = true;
+    items.push({ title: clean, url: url || '' });
+  }
+
   const anchorRegex = /<a\b[^>]*>([\s\S]*?)<\/a>/gi;
   let match;
   let count = 0;
   while ((match = anchorRegex.exec(htmlText)) !== null && count < 40) {
     const fullTag = match[0];
     const text = stripTags(match[1]);
-    if (!text || text.length < 3 || text.length > 140) continue;
-
     const hrefMatch = /href\s*=\s*["']([^"']+)["']/i.exec(fullTag);
     let href = hrefMatch ? hrefMatch[1] : '';
     if (href && href.indexOf('/') === 0) {
@@ -103,24 +131,21 @@ function extractLinksAndTitles(htmlText, baseUrl) {
         // keep relative href if URL parsing fails
       }
     }
-
-    const lower = text.toLowerCase();
-    const isRelevant =
-      lower.indexOf('character') !== -1 ||
-      lower.indexOf('unlock') !== -1 ||
-      lower.indexOf('shards') !== -1 ||
-      lower.indexOf('update') !== -1 ||
-      lower.indexOf('release') !== -1 ||
-      lower.indexOf('event') !== -1 ||
-      lower.indexOf('war') !== -1 ||
-      lower.indexOf('dimension') !== -1 ||
-      lower.indexOf('sauron') !== -1;
-
-    if (isRelevant) {
-      items.push({ title: text, url: href });
-      count++;
-    }
+    const prevLen = items.length;
+    pushUnique(text, href);
+    if (items.length > prevLen) count++;
   }
+
+  const headingRegex = /<(h1|h2|h3|p)\b[^>]*>([\s\S]*?)<\/\1>/gi;
+  let hMatch;
+  let hCount = 0;
+  while ((hMatch = headingRegex.exec(htmlText)) !== null && hCount < 25) {
+    const hText = stripTags(hMatch[2]);
+    const prevLen = items.length;
+    pushUnique(hText, baseUrl);
+    if (items.length > prevLen) hCount++;
+  }
+
   return items;
 }
 
@@ -209,7 +234,48 @@ async function queryExternalEndpoints(endpoints) {
   return results;
 }
 
-function printBuildSummary(externalResults, manifest, updatedAtIso) {
+function collectDiscoveredCandidates(externalResults, existingCharacters, updatedAtIso) {
+  const knownSlugs = {};
+  const knownNames = {};
+
+  for (let i = 0; i < existingCharacters.length; i++) {
+    const c = existingCharacters[i];
+    if (c && c.name) knownNames[String(c.name).toLowerCase().trim()] = true;
+    if (c && c.slug) knownSlugs[slugify(c.slug)] = true;
+    if (c && c.name) knownSlugs[slugify(c.name)] = true;
+  }
+
+  const discovered = [];
+  const seenDiscovered = {};
+
+  for (let i = 0; i < externalResults.length; i++) {
+    const src = externalResults[i];
+    if (!src || !Array.isArray(src.items)) continue;
+    for (let j = 0; j < src.items.length; j++) {
+      const item = src.items[j];
+      const title = item && item.title ? String(item.title).trim() : '';
+      if (!title) continue;
+      const lowerTitle = title.toLowerCase();
+      const candSlug = slugify(title);
+      if (knownNames[lowerTitle] || knownSlugs[candSlug] || seenDiscovered[candSlug]) continue;
+
+      seenDiscovered[candSlug] = true;
+      discovered.push({
+        candidateTitle: title,
+        slug: candSlug,
+        sourceName: src.name || 'PLACEHOLDER: Source',
+        sourceUrl: src.url || '',
+        itemUrl: item.url || '',
+        shardsRequiredPlaceholder: 'PLACEHOLDER: Unlock Shards',
+        discoveredAt: updatedAtIso
+      });
+    }
+  }
+
+  return discovered;
+}
+
+function printBuildSummary(externalResults, manifest, discoveredCandidates, updatedAtIso) {
   console.log('====================================================');
   console.log('MSF BUILD SUMMARY (UTC): ' + updatedAtIso);
   console.log('====================================================');
@@ -239,6 +305,12 @@ function printBuildSummary(externalResults, manifest, updatedAtIso) {
         }
       }
     }
+  }
+
+  console.log('----------------------------------------------------');
+  console.log('New Discovered Candidates: ' + discoveredCandidates.length);
+  for (let d = 0; d < Math.min(10, discoveredCandidates.length); d++) {
+    console.log('  + ' + discoveredCandidates[d].candidateTitle + ' (' + discoveredCandidates[d].sourceName + ')');
   }
 
   console.log('----------------------------------------------------');
@@ -519,12 +591,28 @@ async function main() {
     });
   }
 
+  const discoveredCandidates = collectDiscoveredCandidates(externalResults, characters, updatedAtIso);
+
+  fs.writeFileSync(
+    DISCOVERED_FILE,
+    JSON.stringify(
+      {
+        updatedAt: updatedAtIso,
+        candidates: discoveredCandidates
+      },
+      null,
+      2
+    ),
+    'utf8'
+  );
+
   fs.writeFileSync(
     path.join(PUBLIC_CHARS_DIR, 'manifest.json'),
     JSON.stringify(
       {
         updatedAt: updatedAtIso,
         externalSources: externalResults,
+        discoveredCandidates: discoveredCandidates,
         characters: manifest
       },
       null,
@@ -533,7 +621,7 @@ async function main() {
     'utf8'
   );
 
-  printBuildSummary(externalResults, manifest, updatedAtIso);
+  printBuildSummary(externalResults, manifest, discoveredCandidates, updatedAtIso);
 }
 
 main().catch(function (err) {
