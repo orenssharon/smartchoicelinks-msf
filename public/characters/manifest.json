@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-11-21T14:22:14.142Z",
+  "updatedAt": "2026-11-21T14:23:21.595Z",
   "externalSources": [
     {
       "name": "Scopely MSF News & Updates",
@@ -68,7 +68,7 @@
       "sourceUrl": "https://www.msfbase.com/news/",
       "itemUrl": "https://www.msfbase.com/characters/",
       "shardsRequiredPlaceholder": "PLACEHOLDER: Unlock Shards",
-      "discoveredAt": "2026-11-21T14:22:14.142Z"
+      "discoveredAt": "2026-11-21T14:23:21.595Z"
     },
     {
       "candidateTitle": "Tags and character mentions are automatically parsed and may not be 100% accurate.",
@@ -77,7 +77,7 @@
       "sourceUrl": "https://www.msfbase.com/news/",
       "itemUrl": "https://www.msfbase.com/news/",
       "shardsRequiredPlaceholder": "PLACEHOLDER: Unlock Shards",
-      "discoveredAt": "2026-11-21T14:22:14.142Z"
+      "discoveredAt": "2026-11-21T14:23:21.595Z"
     },
     {
       "candidateTitle": "Game Characters",
@@ -86,7 +86,7 @@
       "sourceUrl": "https://scopely.helpshift.com/hc/en/46-marvel-strike-force/faq/5883-how-do-i-unlock-characters/",
       "itemUrl": "",
       "shardsRequiredPlaceholder": "PLACEHOLDER: Unlock Shards",
-      "discoveredAt": "2026-11-21T14:22:14.142Z"
+      "discoveredAt": "2026-11-21T14:23:21.595Z"
     },
     {
       "candidateTitle": "How do I unlock characters?",
@@ -95,14 +95,14 @@
       "sourceUrl": "https://scopely.helpshift.com/hc/en/46-marvel-strike-force/faq/5883-how-do-i-unlock-characters/",
       "itemUrl": "https://scopely.helpshift.com/hc/en/46-marvel-strike-force/faq/5883-how-do-i-unlock-characters/",
       "shardsRequiredPlaceholder": "PLACEHOLDER: Unlock Shards",
-      "discoveredAt": "2026-11-21T14:22:14.142Z"
+      "discoveredAt": "2026-11-21T14:23:21.595Z"
     }
   ],
   "characters": [
     {
       "name": "Sauron",
       "slug": "should-you-recruit-sauron",
-      "updatedAt": "2026-11-21T14:22:14.142Z",
+      "updatedAt": "2026-11-21T14:23:21.595Z",
       "htmlPath": "public/characters/should-you-recruit-sauron/index.html"
     }
   ]
