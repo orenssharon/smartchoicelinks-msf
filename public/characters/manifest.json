@@ -1,12 +1,12 @@
 {
-  "updatedAt": "2026-11-21T12:36:33.400Z",
-  "externalSourcesChecked": 0,
+  "updatedAt": "2026-11-21T12:44:01.815Z",
+  "externalSourcesChecked": 1,
   "characters": [
     {
-      "name": "PLACEHOLDER: New Character Name",
-      "slug": "should-you-recruit-placeholder-character",
-      "updatedAt": "2026-11-21T12:36:33.400Z",
-      "htmlPath": "public/characters/should-you-recruit-placeholder-character/index.html"
+      "name": "Sauron",
+      "slug": "should-you-recruit-sauron",
+      "updatedAt": "2026-11-21T12:44:01.815Z",
+      "htmlPath": "public/characters/should-you-recruit-sauron/index.html"
     }
   ]
 }
