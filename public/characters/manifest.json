@@ -1,75 +1,16 @@
 {
-  "updatedAt": "2026-11-22T13:08:08.810Z",
+  "updatedAt": "2026-11-22T13:25:15.694Z",
   "hubPath": "public/characters/index.html",
   "sitemapPath": "public/sitemap.xml",
   "autoAddedCount": 0,
-  "externalSources": [
-    {
-      "name": "Scopely MSF News & Updates",
-      "url": "https://marvelstrikeforce.com/en/updates",
-      "status": "ok-html",
-      "itemsCount": 0,
-      "items": []
-    },
-    {
-      "name": "Scopely MSF Characters Directory",
-      "url": "https://marvelstrikeforce.com/characters",
-      "status": "ok-html",
-      "itemsCount": 0,
-      "items": []
-    },
-    {
-      "name": "MSF Base News",
-      "url": "https://www.msfbase.com/news/",
-      "status": "ok-html",
-      "itemsCount": 2,
-      "items": [
-        {
-          "title": "Characters",
-          "url": "https://www.msfbase.com/characters/"
-        },
-        {
-          "title": "Tags and character mentions are automatically parsed and may not be 100% accurate.",
-          "url": "https://www.msfbase.com/news/"
-        }
-      ]
-    },
-    {
-      "name": "Scopely MSF Help Center - Unlock Characters",
-      "url": "https://scopely.helpshift.com/hc/en/46-marvel-strike-force/faq/5883-how-do-i-unlock-characters/",
-      "status": "ok-html",
-      "itemsCount": 2,
-      "items": [
-        {
-          "title": "Game Characters",
-          "url": ""
-        },
-        {
-          "title": "How do I unlock characters?",
-          "url": "https://scopely.helpshift.com/hc/en/46-marvel-strike-force/faq/5883-how-do-i-unlock-characters/"
-        }
-      ]
-    },
-    {
-      "name": "Reddit r/MarvelStrikeForce New Releases Feed",
-      "url": "https://www.reddit.com/r/MarvelStrikeForce/search.json?q=new+character&sort=new&restrict_sr=on&limit=10",
-      "status": "http-403",
-      "items": []
-    },
-    {
-      "name": "Reddit r/MarvelStrikeForce Hot Feed",
-      "url": "https://www.reddit.com/r/MarvelStrikeForce/hot.json?limit=15",
-      "status": "http-403",
-      "items": []
-    }
-  ],
+  "externalSources": [],
   "discoveredCandidates": [],
   "characters": [
     {
       "name": "Sauron",
       "slug": "should-you-recruit-sauron",
       "autoDiscovered": false,
-      "updatedAt": "2026-11-22T13:08:08.810Z",
+      "updatedAt": "2026-11-22T13:25:15.694Z",
       "htmlPath": "public/characters/should-you-recruit-sauron/index.html"
     }
   ]
