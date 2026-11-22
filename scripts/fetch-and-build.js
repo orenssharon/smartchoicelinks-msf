@@ -116,6 +116,23 @@ function isLikelyCharacterCandidate(title) {
   const words = clean.split(/\s+/).filter(Boolean);
   if (words.length === 0 || words.length > 6) return false;
 
+  const genericTitles = [
+    'characters',
+    'character',
+    'game characters',
+    'all characters',
+    'list of characters',
+    'character list',
+    'roster',
+    'unlock characters',
+    'new characters',
+    'upcoming characters'
+  ];
+
+  for (let g = 0; g < genericTitles.length; g++) {
+    if (lower === genericTitles[g]) return false;
+  }
+
   const noisePhrases = [
     'how do i',
     'anyone else',
