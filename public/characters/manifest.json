@@ -1,6 +1,7 @@
 {
-  "updatedAt": "2026-11-22T12:32:17.599Z",
+  "updatedAt": "2026-11-22T12:38:13.068Z",
   "hubPath": "public/characters/index.html",
+  "sitemapPath": "public/sitemap.xml",
   "externalSources": [
     {
       "name": "Scopely MSF News & Updates",
@@ -69,7 +70,7 @@
       "sourceUrl": "https://www.msfbase.com/news/",
       "itemUrl": "https://www.msfbase.com/characters/",
       "shardsRequiredPlaceholder": "PLACEHOLDER: Unlock Shards",
-      "discoveredAt": "2026-11-22T12:32:17.599Z"
+      "discoveredAt": "2026-11-22T12:38:13.068Z"
     },
     {
       "candidateTitle": "Tags and character mentions are automatically parsed and may not be 100% accurate.",
@@ -78,7 +79,7 @@
       "sourceUrl": "https://www.msfbase.com/news/",
       "itemUrl": "https://www.msfbase.com/news/",
       "shardsRequiredPlaceholder": "PLACEHOLDER: Unlock Shards",
-      "discoveredAt": "2026-11-22T12:32:17.599Z"
+      "discoveredAt": "2026-11-22T12:38:13.068Z"
     },
     {
       "candidateTitle": "Game Characters",
@@ -87,7 +88,7 @@
       "sourceUrl": "https://scopely.helpshift.com/hc/en/46-marvel-strike-force/faq/5883-how-do-i-unlock-characters/",
       "itemUrl": "",
       "shardsRequiredPlaceholder": "PLACEHOLDER: Unlock Shards",
-      "discoveredAt": "2026-11-22T12:32:17.599Z"
+      "discoveredAt": "2026-11-22T12:38:13.068Z"
     },
     {
       "candidateTitle": "How do I unlock characters?",
@@ -96,14 +97,14 @@
       "sourceUrl": "https://scopely.helpshift.com/hc/en/46-marvel-strike-force/faq/5883-how-do-i-unlock-characters/",
       "itemUrl": "https://scopely.helpshift.com/hc/en/46-marvel-strike-force/faq/5883-how-do-i-unlock-characters/",
       "shardsRequiredPlaceholder": "PLACEHOLDER: Unlock Shards",
-      "discoveredAt": "2026-11-22T12:32:17.599Z"
+      "discoveredAt": "2026-11-22T12:38:13.068Z"
     }
   ],
   "characters": [
     {
       "name": "Sauron",
       "slug": "should-you-recruit-sauron",
-      "updatedAt": "2026-11-22T12:32:17.599Z",
+      "updatedAt": "2026-11-22T12:38:13.068Z",
       "htmlPath": "public/characters/should-you-recruit-sauron/index.html"
     }
   ]
