@@ -330,6 +330,80 @@ function collectDiscoveredCandidates(externalResults, existingCharacters, update
   return discovered;
 }
 
+function buildAutoCharacterEntry(candidate) {
+  const title = candidate.candidateTitle || 'PLACEHOLDER: Character Name';
+  const slug = slugify(candidate.slug || title);
+  const srcLabel = candidate.sourceName || 'PLACEHOLDER: Source';
+
+  return {
+    name: title,
+    slug: slug,
+    autoDiscovered: true,
+    sourceName: srcLabel,
+    sourceUrl: candidate.sourceUrl || '',
+    itemUrl: candidate.itemUrl || '',
+    shardsRequired: null,
+    dailySources: [
+      {
+        label: 'PLACEHOLDER: Daily Source (' + srcLabel + ')',
+        defaultDailyShards: 0
+      }
+    ],
+    offerOrOrb: {
+      label: 'PLACEHOLDER: Offer or Orb Name',
+      shardsPerPurchase: 0,
+      priceLabel: 'PLACEHOLDER: Price'
+    },
+    whatCharacterDoes: [
+      'PLACEHOLDER: Auto-discovered from ' + srcLabel + ' — verified abilities and combat role pending confirmation.'
+    ],
+    bestTeams: [
+      {
+        teamName: 'PLACEHOLDER: Team Name',
+        gameModes: 'PLACEHOLDER: Modes',
+        notes: 'PLACEHOLDER: Verified team synergy pending confirmation.'
+      }
+    ],
+    recommendation: {
+      verdict: 'PLACEHOLDER: Recruit Now or Wait',
+      summary: 'PLACEHOLDER: Auto-generated draft awaiting verified shard and meta data.'
+    },
+    faq: [
+      {
+        question: 'How many shards are required to unlock ' + title + '?',
+        answer: 'PLACEHOLDER: Unlock Shards'
+      },
+      {
+        question: 'Is ' + title + ' verified for roster investment?',
+        answer: 'PLACEHOLDER: Pending verified gameplay and unlock details.'
+      }
+    ]
+  };
+}
+
+function mergeVerifiedAndAutoCharacters(verifiedCharacters, discoveredCandidates) {
+  const combined = [];
+  const seenSlugs = {};
+
+  for (let i = 0; i < verifiedCharacters.length; i++) {
+    const v = verifiedCharacters[i];
+    if (!v) continue;
+    const s = slugify(v.slug || v.name);
+    seenSlugs[s] = true;
+    combined.push(Object.assign({}, v, { slug: s, autoDiscovered: false }));
+  }
+
+  for (let j = 0; j < discoveredCandidates.length; j++) {
+    const cand = discoveredCandidates[j];
+    const s = slugify(cand.slug || cand.candidateTitle);
+    if (seenSlugs[s]) continue;
+    seenSlugs[s] = true;
+    combined.push(buildAutoCharacterEntry(cand));
+  }
+
+  return combined;
+}
+
 function tag(tagName, attrs, innerHtml) {
   return lt() + tagName + (attrs ? ' ' + attrs : '') + gt() + innerHtml + lt() + '/' + tagName + gt();
 }
@@ -357,7 +431,7 @@ function buildSitemapXml(manifest, updatedAtIso) {
       loc: baseHubUrl + '?char=' + encodeURIComponent(item.slug),
       lastmod: item.updatedAt || updatedAtIso,
       changefreq: 'daily',
-      priority: '0.8'
+      priority: item.autoDiscovered ? '0.6' : '0.8'
     });
   }
 
@@ -389,9 +463,9 @@ function buildSitemapXml(manifest, updatedAtIso) {
   return xmlHeader + '\n' + urlsetOpen + '\n' + urlBlocks + '\n' + urlsetClose + '\n';
 }
 
-function printBuildSummary(externalResults, manifest, discoveredCandidates, updatedAtIso) {
+function printBuildSummary(externalResults, manifest, autoAddedCount, updatedAtIso) {
   console.log('====================================================');
-  console.log('MSF BUILD SUMMARY (UTC): ' + updatedAtIso);
+  console.log('MSF AUTO BUILD SUMMARY (UTC): ' + updatedAtIso);
   console.log('====================================================');
   console.log('External Sources Checked: ' + externalResults.length);
 
@@ -422,17 +496,13 @@ function printBuildSummary(externalResults, manifest, discoveredCandidates, upda
   }
 
   console.log('----------------------------------------------------');
-  console.log('New Discovered Candidates: ' + discoveredCandidates.length);
-  for (let d = 0; d < Math.min(10, discoveredCandidates.length); d++) {
-    console.log('  + ' + discoveredCandidates[d].candidateTitle + ' (' + discoveredCandidates[d].sourceName + ')');
-  }
-
-  console.log('----------------------------------------------------');
+  console.log('Auto-Added Character Pages This Run: ' + autoAddedCount);
   console.log('Hub Page Built: public/characters/index.html');
   console.log('Sitemap Built: public/sitemap.xml (' + (manifest.length + 1) + ' URLs)');
-  console.log('Character Pages Built: ' + manifest.length);
+  console.log('Total Character Pages Built: ' + manifest.length);
   for (let k = 0; k < manifest.length; k++) {
-    console.log('  - ' + manifest[k].name + ' -> ' + manifest[k].htmlPath);
+    const modeTag = manifest[k].autoDiscovered ? '[AUTO PLACEHOLDER]' : '[VERIFIED]';
+    console.log('  - ' + modeTag + ' ' + manifest[k].name + ' -> ' + manifest[k].htmlPath);
   }
   console.log('====================================================');
 }
@@ -445,6 +515,7 @@ function getSharedCss() {
     '.msf-meta { margin: 0 0 14px 0; color: #6b7280; }\n' +
     '.msf-placeholder { display: inline-block; background: #fef3c7; color: #92400e; padding: 2px 8px; border-radius: 4px; font-size: 0.85rem; font-weight: 600; }\n' +
     '.msf-badge { display: inline-block; background: #e0e7ff; color: #1e40af; padding: 2px 8px; border-radius: 4px; font-size: 0.85rem; font-weight: 600; }\n' +
+    '.msf-auto-badge { display: inline-block; background: #f3f4f6; color: #374151; border: 1px solid #d1d5db; padding: 2px 8px; border-radius: 4px; font-size: 0.78rem; font-weight: 600; margin-left: 6px; }\n' +
     '.msf-box, .msf-card, .msf-verdict { border: 1px solid #d1d5db; border-radius: 10px; padding: 16px; margin: 16px 0; background: #f9fafb; }\n' +
     '.msf-field { display: grid; gap: 6px; margin-bottom: 12px; }\n' +
     '.msf-field input, .msf-search-input { width: 100%; padding: 10px 12px; border: 1px solid #9ca3af; border-radius: 8px; font-size: 1rem; background: #ffffff; color: #111827; }\n' +
@@ -489,7 +560,7 @@ function getToolsNavHtml(includeHubBackLink) {
   );
 }
 
-function renderHubHtml(characters, discoveredCandidates, updatedAtIso) {
+function renderHubHtml(characters, updatedAtIso) {
   const Q = q();
   const SQ = sq();
   const A = amp();
@@ -505,6 +576,10 @@ function renderHubHtml(characters, discoveredCandidates, updatedAtIso) {
             const reqHtml = hasReq
               ? tag('span', 'class=' + Q + 'msf-badge' + Q, c.shardsRequired + ' Shards to Unlock')
               : tag('span', 'class=' + Q + 'msf-placeholder' + Q, 'PLACEHOLDER: Unlock Shards');
+
+            const autoTagHtml = c.autoDiscovered
+              ? tag('span', 'class=' + Q + 'msf-auto-badge' + Q, 'Auto-Synced')
+              : '';
 
             const teamNames = Array.isArray(c.bestTeams)
               ? c.bestTeams
@@ -528,7 +603,7 @@ function renderHubHtml(characters, discoveredCandidates, updatedAtIso) {
             return tag(
               'article',
               'class=' + Q + 'msf-card msf-hub-item' + Q + ' data-search=' + Q + searchBlob + Q,
-              tag('h3', 'style=' + Q + 'margin-top:0;' + Q, name) +
+              tag('h3', 'style=' + Q + 'margin-top:0;' + Q, name + autoTagHtml) +
               tag('p', '', reqHtml) +
               tag('p', '', tag('strong', '', 'Teams:') + ' ' + teamsText) +
               tag('p', '', tag('strong', '', 'Verdict:') + ' ' + verdictText) +
@@ -539,52 +614,19 @@ function renderHubHtml(characters, discoveredCandidates, updatedAtIso) {
       : tag(
           'div',
           'class=' + Q + 'msf-card' + Q,
-          tag('span', 'class=' + Q + 'msf-placeholder' + Q, 'PLACEHOLDER: No verified characters published yet')
+          tag('span', 'class=' + Q + 'msf-placeholder' + Q, 'PLACEHOLDER: No character guides published yet')
         );
-
-  const discoveredSectionHtml =
-    discoveredCandidates.length > 0
-      ? tag(
-          'section',
-          '',
-          tag('h2', '', 'Pending Verification Queue (' + discoveredCandidates.length + ')') +
-          tag(
-            'p',
-            '',
-            'Recently detected headlines/candidates awaiting manual shard and ability verification (no unverified stats are generated):'
-          ) +
-          tag(
-            'div',
-            'class=' + Q + 'msf-grid' + Q,
-            discoveredCandidates
-              .slice(0, 12)
-              .map(function (d) {
-                const dTitle = escapeHtml(d.candidateTitle || 'PLACEHOLDER: Candidate');
-                const dSource = escapeHtml(d.sourceName || 'PLACEHOLDER: Source');
-                const searchBlob = escapeHtml((d.candidateTitle || '') + ' ' + (d.sourceName || '')).toLowerCase();
-                return tag(
-                  'div',
-                  'class=' + Q + 'msf-stat msf-hub-item' + Q + ' data-search=' + Q + searchBlob + Q,
-                  tag('strong', '', dTitle) +
-                  tag('div', 'style=' + Q + 'margin-top:6px;' + Q, tag('span', 'class=' + Q + 'msf-placeholder' + Q, 'PLACEHOLDER: Pending Verification')) +
-                  tag('p', 'style=' + Q + 'margin:8px 0 0 0; font-size:0.88rem; color:#4b5563;' + Q, 'Source: ' + dSource)
-                );
-              })
-              .join('\n')
-          )
-        )
-      : '';
 
   const hubBody = tag(
     'main',
     'class=' + Q + 'msf-wrap' + Q + ' data-updated=' + Q + escapeHtml(updatedAtIso) + Q,
     tag('p', 'class=' + Q + 'msf-site-title' + Q, 'SmartChoiceLinks ' + A + 'bull; MSF Character Intelligence') +
-    tag('p', 'class=' + Q + 'msf-meta' + Q, tag('small', '', 'Updated snapshot (UTC): ' + escapeHtml(updatedAtIso))) +
+    tag('p', 'class=' + Q + 'msf-meta' + Q, tag('small', '', 'Auto-updated snapshot (UTC): ' + escapeHtml(updatedAtIso))) +
     tag('h1', '', title) +
     tag(
       'p',
       '',
-      'Search verified Marvel Strike Force character guides and run F2P shard unlock vs. offer savings calculations before spending Power Cores.'
+      'Automatically updated Marvel Strike Force character guides and shard calculators. Unverified fields display explicit PLACEHOLDER tags until confirmed.'
     ) +
     tag(
       'section',
@@ -594,18 +636,17 @@ function renderHubHtml(characters, discoveredCandidates, updatedAtIso) {
         'input',
         'type=' + Q + 'search' + Q + ' id=' + Q + 'msf-hub-search' + Q +
         ' class=' + Q + 'msf-search-input' + Q +
-        ' placeholder=' + Q + 'Type character name or team (e.g. Sauron, Savage Land)...' + Q
+        ' placeholder=' + Q + 'Type character name or team...' + Q
       ) +
-      tag('p', 'id=' + Q + 'msf-hub-count' + Q + ' style=' + Q + 'margin:8px 0 0 0; font-size:0.9rem; color:#4b5563;' + Q, 'Showing ' + characters.length + ' verified character guide(s)')
+      tag('p', 'id=' + Q + 'msf-hub-count' + Q + ' style=' + Q + 'margin:8px 0 0 0; font-size:0.9rem; color:#4b5563;' + Q, 'Showing ' + characters.length + ' character guide(s)')
     ) +
     tag(
       'section',
       '',
-      tag('h2', '', 'Verified Character Guides ' + A + 'amp; Shard Calculators') +
+      tag('h2', '', 'Character Guides ' + A + 'amp; Shard Calculators') +
       tag('div', 'id=' + Q + 'msf-hub-list' + Q + ' class=' + Q + 'msf-grid' + Q, charCardsHtml) +
       tag('p', 'id=' + Q + 'msf-hub-empty' + Q + ' class=' + Q + 'msf-empty' + Q, 'No matching characters found. Clear the search box to view all entries.')
     ) +
-    discoveredSectionHtml +
     getToolsNavHtml(false)
   );
 
@@ -854,13 +895,17 @@ async function main() {
 
   const externalResults = await queryExternalEndpoints(rawSources.externalEndpoints);
   const updatedAtIso = new Date().toISOString();
-  const characters = Array.isArray(rawSources.candidateCharacters) ? rawSources.candidateCharacters : [];
+  const verifiedCharacters = Array.isArray(rawSources.candidateCharacters) ? rawSources.candidateCharacters : [];
+
+  const discoveredCandidates = collectDiscoveredCandidates(externalResults, verifiedCharacters, updatedAtIso);
+  const allCharacters = mergeVerifiedAndAutoCharacters(verifiedCharacters, discoveredCandidates);
 
   fs.mkdirSync(PUBLIC_CHARS_DIR, { recursive: true });
   const manifest = [];
+  let autoAddedCount = 0;
 
-  for (let i = 0; i < characters.length; i++) {
-    const charItem = characters[i];
+  for (let i = 0; i < allCharacters.length; i++) {
+    const charItem = allCharacters[i];
     const slug = slugify(charItem.slug || charItem.name);
     const charDir = path.join(PUBLIC_CHARS_DIR, slug);
     fs.mkdirSync(charDir, { recursive: true });
@@ -868,17 +913,18 @@ async function main() {
     const html = renderCharacterHtml(charItem, updatedAtIso);
     fs.writeFileSync(path.join(charDir, 'index.html'), html, 'utf8');
 
+    if (charItem.autoDiscovered) autoAddedCount++;
+
     manifest.push({
       name: charItem.name || 'PLACEHOLDER: Character Name',
       slug: slug,
+      autoDiscovered: Boolean(charItem.autoDiscovered),
       updatedAt: updatedAtIso,
       htmlPath: 'public/characters/' + slug + '/index.html'
     });
   }
 
-  const discoveredCandidates = collectDiscoveredCandidates(externalResults, characters, updatedAtIso);
-
-  const hubHtml = renderHubHtml(characters, discoveredCandidates, updatedAtIso);
+  const hubHtml = renderHubHtml(allCharacters, updatedAtIso);
   fs.writeFileSync(path.join(PUBLIC_CHARS_DIR, 'index.html'), hubHtml, 'utf8');
 
   const sitemapXml = buildSitemapXml(manifest, updatedAtIso);
@@ -904,6 +950,7 @@ async function main() {
         updatedAt: updatedAtIso,
         hubPath: 'public/characters/index.html',
         sitemapPath: 'public/sitemap.xml',
+        autoAddedCount: autoAddedCount,
         externalSources: externalResults,
         discoveredCandidates: discoveredCandidates,
         characters: manifest
@@ -914,7 +961,7 @@ async function main() {
     'utf8'
   );
 
-  printBuildSummary(externalResults, manifest, discoveredCandidates, updatedAtIso);
+  printBuildSummary(externalResults, manifest, autoAddedCount, updatedAtIso);
 }
 
 main().catch(function (err) {
