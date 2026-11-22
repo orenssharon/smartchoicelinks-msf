@@ -314,6 +314,7 @@ function printBuildSummary(externalResults, manifest, discoveredCandidates, upda
   }
 
   console.log('----------------------------------------------------');
+  console.log('Hub Page Built: public/characters/index.html');
   console.log('Character Pages Built: ' + manifest.length);
   for (let k = 0; k < manifest.length; k++) {
     console.log('  - ' + manifest[k].name + ' -> ' + manifest[k].htmlPath);
@@ -327,6 +328,215 @@ function tag(tagName, attrs, innerHtml) {
 
 function selfTag(tagName, attrs) {
   return lt() + tagName + (attrs ? ' ' + attrs : '') + ' /' + gt();
+}
+
+function getSharedCss() {
+  return (
+    '.msf-wrap { font-family: system-ui, -apple-system, sans-serif; max-width: 900px; width: 100%; margin: 0 auto; padding: 20px; color: #111827; line-height: 1.6; direction: ltr; text-align: left; float: none; box-sizing: border-box; }\n' +
+    '.msf-wrap *, .msf-wrap *::before, .msf-wrap *::after { box-sizing: border-box; }\n' +
+    '.msf-site-title { font-weight: 700; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.04em; color: #4b5563; margin: 0 0 6px 0; }\n' +
+    '.msf-meta { margin: 0 0 14px 0; color: #6b7280; }\n' +
+    '.msf-placeholder { display: inline-block; background: #fef3c7; color: #92400e; padding: 2px 8px; border-radius: 4px; font-size: 0.85rem; font-weight: 600; }\n' +
+    '.msf-badge { display: inline-block; background: #e0e7ff; color: #1e40af; padding: 2px 8px; border-radius: 4px; font-size: 0.85rem; font-weight: 600; }\n' +
+    '.msf-box, .msf-card, .msf-verdict { border: 1px solid #d1d5db; border-radius: 10px; padding: 16px; margin: 16px 0; background: #f9fafb; }\n' +
+    '.msf-field { display: grid; gap: 6px; margin-bottom: 12px; }\n' +
+    '.msf-field input, .msf-search-input { width: 100%; padding: 10px 12px; border: 1px solid #9ca3af; border-radius: 8px; font-size: 1rem; background: #ffffff; color: #111827; }\n' +
+    '.msf-field input { max-width: 260px; }\n' +
+    '.msf-results { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; margin-top: 12px; }\n' +
+    '.msf-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; margin-top: 14px; }\n' +
+    '.msf-stat { background: #ffffff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 12px; }\n' +
+    '.msf-faq { background: #ffffff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 10px 14px; margin: 8px 0; }\n' +
+    '.msf-btn { display: inline-block; margin-top: 10px; padding: 8px 14px; background: #1d4ed8; color: #ffffff !important; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 0.92rem; }\n' +
+    '.msf-links { display: flex; flex-wrap: wrap; gap: 10px; list-style: none; padding: 0; margin: 12px 0 0 0; }\n' +
+    '.msf-links a { display: inline-block; padding: 8px 12px; background: #f3f4f6; border: 1px solid #d1d5db; border-radius: 6px; color: #1f2937; text-decoration: none; font-weight: 500; font-size: 0.92rem; }\n' +
+    '.msf-empty { display: none; padding: 14px; border: 1px dashed #9ca3af; border-radius: 8px; color: #4b5563; background: #ffffff; }'
+  );
+}
+
+function getToolsNavHtml(includeHubBackLink) {
+  const Q = q();
+  const A = amp();
+  const items = [
+    ['/5-essential-msf-calculators/', '5 Essential MSF Calculators'],
+    ['/codes/', 'MSF Promo Codes'],
+    ['/g21-calculator/', 'G21 Calculator'],
+    ['/gold-calculator/', 'Gold Calculator'],
+    ['/turn-1-calculator/', 'Turn-1 Calculator'],
+    ['/meta-hub/', 'Meta Hub']
+  ];
+  if (includeHubBackLink) {
+    items.unshift(['./', 'All Character Guides']);
+  }
+
+  const navItems = items
+    .map(function (pair) {
+      return tag('li', '', tag('a', 'href=' + Q + pair[0] + Q, pair[1]));
+    })
+    .join('\n');
+
+  return tag(
+    'nav',
+    'aria-label=' + Q + 'MSF Tools' + Q,
+    tag('h2', '', 'Marvel Strike Force Tools ' + A + 'amp; Hub') +
+    tag('ul', 'class=' + Q + 'msf-links' + Q, navItems)
+  );
+}
+
+function renderHubHtml(characters, discoveredCandidates, updatedAtIso) {
+  const Q = q();
+  const SQ = sq();
+  const A = amp();
+  const title = 'Marvel Strike Force Character Guides ' + A + 'amp; Shard Calculators Hub';
+
+  const charCardsHtml =
+    characters.length > 0
+      ? characters
+          .map(function (c) {
+            const name = escapeHtml(c.name || 'PLACEHOLDER: Character Name');
+            const slug = slugify(c.slug || c.name);
+            const hasReq = typeof c.shardsRequired === 'number' && Number.isFinite(c.shardsRequired);
+            const reqHtml = hasReq
+              ? tag('span', 'class=' + Q + 'msf-badge' + Q, c.shardsRequired + ' Shards to Unlock')
+              : tag('span', 'class=' + Q + 'msf-placeholder' + Q, 'PLACEHOLDER: Unlock Shards');
+
+            const teamNames = Array.isArray(c.bestTeams)
+              ? c.bestTeams
+                  .map(function (t) {
+                    return t && t.teamName ? String(t.teamName) : '';
+                  })
+                  .filter(Boolean)
+                  .join(', ')
+              : '';
+            const teamsText = escapeHtml(teamNames || 'PLACEHOLDER: Teams');
+            const verdictText = escapeHtml(
+              c.recommendation && c.recommendation.verdict
+                ? c.recommendation.verdict
+                : 'PLACEHOLDER: Recruit Now or Wait'
+            );
+
+            const searchBlob = escapeHtml(
+              (c.name || '') + ' ' + teamNames + ' ' + (c.recommendation && c.recommendation.verdict ? c.recommendation.verdict : '')
+            ).toLowerCase();
+
+            return tag(
+              'article',
+              'class=' + Q + 'msf-card msf-hub-item' + Q + ' data-search=' + Q + searchBlob + Q,
+              tag('h3', 'style=' + Q + 'margin-top:0;' + Q, name) +
+              tag('p', '', reqHtml) +
+              tag('p', '', tag('strong', '', 'Teams:') + ' ' + teamsText) +
+              tag('p', '', tag('strong', '', 'Verdict:') + ' ' + verdictText) +
+              tag('a', 'class=' + Q + 'msf-btn' + Q + ' href=' + Q + './' + escapeHtml(slug) + '/' + Q, 'Open Shard Calculator ' + A + 'amp; Guide')
+            );
+          })
+          .join('\n')
+      : tag(
+          'div',
+          'class=' + Q + 'msf-card' + Q,
+          tag('span', 'class=' + Q + 'msf-placeholder' + Q, 'PLACEHOLDER: No verified characters published yet')
+        );
+
+  const discoveredSectionHtml =
+    discoveredCandidates.length > 0
+      ? tag(
+          'section',
+          '',
+          tag('h2', '', 'Pending Verification Queue (' + discoveredCandidates.length + ')') +
+          tag(
+            'p',
+            '',
+            'Recently detected headlines/candidates awaiting manual shard and ability verification (no unverified stats are generated):'
+          ) +
+          tag(
+            'div',
+            'class=' + Q + 'msf-grid' + Q,
+            discoveredCandidates
+              .slice(0, 12)
+              .map(function (d) {
+                const dTitle = escapeHtml(d.candidateTitle || 'PLACEHOLDER: Candidate');
+                const dSource = escapeHtml(d.sourceName || 'PLACEHOLDER: Source');
+                const searchBlob = escapeHtml((d.candidateTitle || '') + ' ' + (d.sourceName || '')).toLowerCase();
+                return tag(
+                  'div',
+                  'class=' + Q + 'msf-stat msf-hub-item' + Q + ' data-search=' + Q + searchBlob + Q,
+                  tag('strong', '', dTitle) +
+                  tag('div', 'style=' + Q + 'margin-top:6px;' + Q, tag('span', 'class=' + Q + 'msf-placeholder' + Q, 'PLACEHOLDER: Pending Verification')) +
+                  tag('p', 'style=' + Q + 'margin:8px 0 0 0; font-size:0.88rem; color:#4b5563;' + Q, 'Source: ' + dSource)
+                );
+              })
+              .join('\n')
+          )
+        )
+      : '';
+
+  const hubBody = tag(
+    'main',
+    'class=' + Q + 'msf-wrap' + Q + ' data-updated=' + Q + escapeHtml(updatedAtIso) + Q,
+    tag('p', 'class=' + Q + 'msf-site-title' + Q, 'SmartChoiceLinks ' + A + 'bull; MSF Character Intelligence') +
+    tag('p', 'class=' + Q + 'msf-meta' + Q, tag('small', '', 'Updated snapshot (UTC): ' + escapeHtml(updatedAtIso))) +
+    tag('h1', '', title) +
+    tag(
+      'p',
+      '',
+      'Search verified Marvel Strike Force character guides and run F2P shard unlock vs. offer savings calculations before spending Power Cores.'
+    ) +
+    tag(
+      'section',
+      'class=' + Q + 'msf-box' + Q + ' aria-label=' + Q + 'Character Search' + Q,
+      tag('label', 'for=' + Q + 'msf-hub-search' + Q + ' style=' + Q + 'font-weight:700; display:block; margin-bottom:6px;' + Q, 'Search Characters or Teams') +
+      selfTag(
+        'input',
+        'type=' + Q + 'search' + Q + ' id=' + Q + 'msf-hub-search' + Q +
+        ' class=' + Q + 'msf-search-input' + Q +
+        ' placeholder=' + Q + 'Type character name or team (e.g. Sauron, Savage Land)...' + Q
+      ) +
+      tag('p', 'id=' + Q + 'msf-hub-count' + Q + ' style=' + Q + 'margin:8px 0 0 0; font-size:0.9rem; color:#4b5563;' + Q, 'Showing ' + characters.length + ' verified character guide(s)')
+    ) +
+    tag(
+      'section',
+      '',
+      tag('h2', '', 'Verified Character Guides ' + A + 'amp; Shard Calculators') +
+      tag('div', 'id=' + Q + 'msf-hub-list' + Q + ' class=' + Q + 'msf-grid' + Q, charCardsHtml) +
+      tag('p', 'id=' + Q + 'msf-hub-empty' + Q + ' class=' + Q + 'msf-empty' + Q, 'No matching characters found. Clear the search box to view all entries.')
+    ) +
+    discoveredSectionHtml +
+    getToolsNavHtml(false)
+  );
+
+  const hubScript =
+    '(function () {' +
+    '  var root = document.currentScript.closest(' + SQ + '.msf-wrap' + SQ + ');' +
+    '  if (!root) return;' +
+    '  var input = root.querySelector(' + SQ + '#msf-hub-search' + SQ + ');' +
+    '  var items = Array.prototype.slice.call(root.querySelectorAll(' + SQ + '.msf-hub-item' + SQ + '));' +
+    '  var emptyEl = root.querySelector(' + SQ + '#msf-hub-empty' + SQ + ');' +
+    '  var countEl = root.querySelector(' + SQ + '#msf-hub-count' + SQ + ');' +
+    '  if (!input) return;' +
+    '  function filterHub() {' +
+    '    var qStr = String(input.value || ' + SQ + SQ + ').toLowerCase().trim();' +
+    '    var visible = 0;' +
+    '    items.forEach(function (el) {' +
+    '      var hay = el.getAttribute(' + SQ + 'data-search' + SQ + ') || ' + SQ + SQ + ';' +
+    '      var match = !qStr || hay.indexOf(qStr) !== -1;' +
+    '      el.style.display = match ? ' + SQ + SQ + ' : ' + SQ + 'none' + SQ + ';' +
+    '      if (match) visible++;' +
+    '    });' +
+    '    if (emptyEl) emptyEl.style.display = visible === 0 ? ' + SQ + 'block' + SQ + ' : ' + SQ + 'none' + SQ + ';' +
+    '    if (countEl) countEl.textContent = ' + SQ + 'Showing ' + SQ + ' + visible + ' + SQ + ' matching entry(s)' + SQ + ';' +
+    '  }' +
+    '  input.addEventListener(' + SQ + 'input' + SQ + ', filterHub);' +
+    '})();';
+
+  const headHtml = tag(
+    'head',
+    '',
+    selfTag('meta', 'charset=' + Q + 'UTF-8' + Q) +
+    selfTag('meta', 'name=' + Q + 'viewport' + Q + ' content=' + Q + 'width=device-width, initial-scale=1.0' + Q) +
+    tag('title', '', title) +
+    tag('style', '', getSharedCss())
+  );
+
+  const bodyHtml = tag('body', '', hubBody + tag('script', '', hubScript));
+  return '<!DOCTYPE html>\n' + tag('html', 'lang=' + Q + 'en' + Q, headHtml + bodyHtml);
 }
 
 function renderCharacterHtml(charItem, updatedAtIso) {
@@ -434,20 +644,6 @@ function renderCharacterHtml(charItem, updatedAtIso) {
     })
     .join('\n');
 
-  const cssText =
-    '.msf-wrap { font-family: system-ui, -apple-system, sans-serif; max-width: 900px; width: 100%; margin: 0 auto; padding: 20px; color: #111827; line-height: 1.6; direction: ltr; text-align: left; float: none; box-sizing: border-box; }\n' +
-    '.msf-wrap *, .msf-wrap *::before, .msf-wrap *::after { box-sizing: border-box; }\n' +
-    '.msf-site-title { font-weight: 700; font-size: 0.95rem; text-transform: uppercase; letter-spacing: 0.04em; color: #4b5563; margin: 0 0 6px 0; }\n' +
-    '.msf-meta { margin: 0 0 12px 0; color: #6b7280; }\n' +
-    '.msf-placeholder { display: inline-block; background: #fef3c7; color: #92400e; padding: 2px 8px; border-radius: 4px; font-size: 0.85rem; }\n' +
-    '.msf-box, .msf-card, .msf-verdict { border: 1px solid #d1d5db; border-radius: 8px; padding: 16px; margin: 16px 0; background: #f9fafb; }\n' +
-    '.msf-field { display: grid; gap: 6px; margin-bottom: 12px; }\n' +
-    '.msf-field input { max-width: 240px; width: 100%; padding: 8px; border: 1px solid #9ca3af; border-radius: 6px; }\n' +
-    '.msf-results { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; margin-top: 12px; }\n' +
-    '.msf-stat { background: #ffffff; border: 1px solid #e5e7eb; border-radius: 6px; padding: 12px; }\n' +
-    '.msf-faq { background: #ffffff; border: 1px solid #e5e7eb; border-radius: 6px; padding: 10px 14px; margin: 8px 0; }\n' +
-    '.msf-links { display: flex; flex-wrap: wrap; gap: 12px; list-style: none; padding: 0; }';
-
   const calcBoxHtml =
     tag('h2', '', 'Shard Unlock ' + A + 'amp; Offer Savings Calculator') +
     tag(
@@ -480,19 +676,6 @@ function renderCharacterHtml(charItem, updatedAtIso) {
       tag('div', 'class=' + Q + 'msf-stat' + Q, tag('strong', '', 'Days Saved (1 Offer/Orb)') + tag('div', 'id=' + Q + 'msf-out-saved' + Q, 'N/A'))
     );
 
-  const navItems = [
-    ['/5-essential-msf-calculators/', '5 Essential MSF Calculators'],
-    ['/codes/', 'MSF Promo Codes'],
-    ['/g21-calculator/', 'G21 Calculator'],
-    ['/gold-calculator/', 'Gold Calculator'],
-    ['/turn-1-calculator/', 'Turn-1 Calculator'],
-    ['/meta-hub/', 'Meta Hub']
-  ]
-    .map(function (pair) {
-      return tag('li', '', tag('a', 'href=' + Q + pair[0] + Q, pair[1]));
-    })
-    .join('\n');
-
   const articleHtml = tag(
     'article',
     'class=' + Q + 'msf-wrap' + Q + ' data-slug=' + Q + escapeHtml(slug) + Q + ' data-updated=' + Q + escapeHtml(updatedAtIso) + Q,
@@ -504,12 +687,7 @@ function renderCharacterHtml(charItem, updatedAtIso) {
     tag('section', '', tag('h2', '', 'Best Teams') + teamsHtml) +
     tag('section', 'class=' + Q + 'msf-verdict' + Q, tag('h2', '', 'Recommendation: ' + verdict) + tag('p', '', verdictSummary)) +
     tag('section', '', tag('h2', '', 'Frequently Asked Questions') + faqHtml) +
-    tag(
-      'nav',
-      'aria-label=' + Q + 'MSF Tools' + Q,
-      tag('h2', '', 'Marvel Strike Force Tools ' + A + 'amp; Hub') +
-      tag('ul', 'class=' + Q + 'msf-links' + Q, navItems)
-    )
+    getToolsNavHtml(true)
   );
 
   const inlineJs =
@@ -555,7 +733,7 @@ function renderCharacterHtml(charItem, updatedAtIso) {
     selfTag('meta', 'charset=' + Q + 'UTF-8' + Q) +
     selfTag('meta', 'name=' + Q + 'viewport' + Q + ' content=' + Q + 'width=device-width, initial-scale=1.0' + Q) +
     tag('title', '', escapeHtml(title)) +
-    tag('style', '', cssText)
+    tag('style', '', getSharedCss())
   );
 
   const bodyHtml = tag('body', '', articleHtml + tag('script', '', inlineJs));
@@ -593,6 +771,9 @@ async function main() {
 
   const discoveredCandidates = collectDiscoveredCandidates(externalResults, characters, updatedAtIso);
 
+  const hubHtml = renderHubHtml(characters, discoveredCandidates, updatedAtIso);
+  fs.writeFileSync(path.join(PUBLIC_CHARS_DIR, 'index.html'), hubHtml, 'utf8');
+
   fs.writeFileSync(
     DISCOVERED_FILE,
     JSON.stringify(
@@ -611,6 +792,7 @@ async function main() {
     JSON.stringify(
       {
         updatedAt: updatedAtIso,
+        hubPath: 'public/characters/index.html',
         externalSources: externalResults,
         discoveredCandidates: discoveredCandidates,
         characters: manifest
