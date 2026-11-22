@@ -48,22 +48,47 @@ function replaceCode(inputStr, targetCode, replacement) {
   return out;
 }
 
+function replaceSubstr(inputStr, searchStr, replacement) {
+  let s = String(inputStr === undefined || inputStr === null ? '' : inputStr);
+  if (!searchStr) return s;
+  let out = '';
+  let idx = 0;
+  while (idx < s.length) {
+    const found = s.indexOf(searchStr, idx);
+    if (found === -1) {
+      out += s.slice(idx);
+      break;
+    }
+    out += s.slice(idx, found) + replacement;
+    idx = found + searchStr.length;
+  }
+  return out;
+}
+
 function decodeBasicEntities(text) {
+  const A = amp();
+  const Q = q();
+  const SQ = sq();
+  const LT = lt();
+  const GT = gt();
+
   let s = String(text || '');
-  s = s.split('&').join('&');
-  s = s.split('<').join('<');
-  s = s.split('>').join('>');
-  s = s.split('"').join('"');
-  s = s.split(''').join("'");
-  s = s.split(''').join("'");
-  s = s.split(' ').join(' ');
+  s = replaceSubstr(s, A + 'quot;', Q);
+  s = replaceSubstr(s, A + '#39;', SQ);
+  s = replaceSubstr(s, A + 'apos;', SQ);
+  s = replaceSubstr(s, A + 'lt;', LT);
+  s = replaceSubstr(s, A + 'gt;', GT);
+  s = replaceSubstr(s, A + 'nbsp;', ' ');
+  s = replaceSubstr(s, A + 'amp;', A);
   return s;
 }
 
 function stripCdata(text) {
+  const LT = lt();
+  const GT = gt();
   let s = String(text || '');
-  const openTag = '<![CDATA[';
-  const closeTag = ']]>';
+  const openTag = LT + '![CDATA[';
+  const closeTag = ']]' + GT;
   while (s.indexOf(openTag) !== -1) {
     const startIdx = s.indexOf(openTag);
     const endIdx = s.indexOf(closeTag, startIdx + openTag.length);
@@ -95,7 +120,7 @@ function slugify(text) {
     out += ok ? c : '-';
   }
   while (out.indexOf('--') !== -1) {
-    out = out.split('--').join('-');
+    out = replaceSubstr(out, '--', '-');
   }
   if (out.charAt(0) === '-') out = out.slice(1);
   if (out.charAt(out.length - 1) === '-') out = out.slice(0, -1);
