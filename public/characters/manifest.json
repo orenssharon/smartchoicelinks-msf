@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-11-22T12:38:13.068Z",
+  "updatedAt": "2026-11-22T12:41:21.994Z",
   "hubPath": "public/characters/index.html",
   "sitemapPath": "public/sitemap.xml",
   "externalSources": [
@@ -70,7 +70,7 @@
       "sourceUrl": "https://www.msfbase.com/news/",
       "itemUrl": "https://www.msfbase.com/characters/",
       "shardsRequiredPlaceholder": "PLACEHOLDER: Unlock Shards",
-      "discoveredAt": "2026-11-22T12:38:13.068Z"
+      "discoveredAt": "2026-11-22T12:41:21.994Z"
     },
     {
       "candidateTitle": "Tags and character mentions are automatically parsed and may not be 100% accurate.",
@@ -79,7 +79,7 @@
       "sourceUrl": "https://www.msfbase.com/news/",
       "itemUrl": "https://www.msfbase.com/news/",
       "shardsRequiredPlaceholder": "PLACEHOLDER: Unlock Shards",
-      "discoveredAt": "2026-11-22T12:38:13.068Z"
+      "discoveredAt": "2026-11-22T12:41:21.994Z"
     },
     {
       "candidateTitle": "Game Characters",
@@ -88,7 +88,7 @@
       "sourceUrl": "https://scopely.helpshift.com/hc/en/46-marvel-strike-force/faq/5883-how-do-i-unlock-characters/",
       "itemUrl": "",
       "shardsRequiredPlaceholder": "PLACEHOLDER: Unlock Shards",
-      "discoveredAt": "2026-11-22T12:38:13.068Z"
+      "discoveredAt": "2026-11-22T12:41:21.994Z"
     },
     {
       "candidateTitle": "How do I unlock characters?",
@@ -97,14 +97,14 @@
       "sourceUrl": "https://scopely.helpshift.com/hc/en/46-marvel-strike-force/faq/5883-how-do-i-unlock-characters/",
       "itemUrl": "https://scopely.helpshift.com/hc/en/46-marvel-strike-force/faq/5883-how-do-i-unlock-characters/",
       "shardsRequiredPlaceholder": "PLACEHOLDER: Unlock Shards",
-      "discoveredAt": "2026-11-22T12:38:13.068Z"
+      "discoveredAt": "2026-11-22T12:41:21.994Z"
     }
   ],
   "characters": [
     {
       "name": "Sauron",
       "slug": "should-you-recruit-sauron",
-      "updatedAt": "2026-11-22T12:38:13.068Z",
+      "updatedAt": "2026-11-22T12:41:21.994Z",
       "htmlPath": "public/characters/should-you-recruit-sauron/index.html"
     }
   ]
