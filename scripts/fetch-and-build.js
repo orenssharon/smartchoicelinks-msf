@@ -108,6 +108,38 @@ function isRelevantCandidateText(text) {
   );
 }
 
+function isLikelyCharacterCandidate(title) {
+  const clean = String(title || '').trim();
+  const lower = clean.toLowerCase();
+  if (clean.length < 3 || clean.length > 65) return false;
+
+  const words = clean.split(/\s+/).filter(Boolean);
+  if (words.length === 0 || words.length > 6) return false;
+
+  const noisePhrases = [
+    'how do i',
+    'anyone else',
+    'what is the best',
+    'unpopular opinion',
+    'psa:',
+    'bug',
+    'maintenance',
+    'compensation',
+    'complaint',
+    'rant',
+    'help with',
+    'tier list',
+    'promo code',
+    'codes'
+  ];
+
+  for (let i = 0; i < noisePhrases.length; i++) {
+    if (lower.indexOf(noisePhrases[i]) !== -1) return false;
+  }
+
+  return true;
+}
+
 function extractLinksAndTitles(htmlText, baseUrl) {
   const items = [];
   const seenTitles = {};
@@ -260,6 +292,7 @@ function collectDiscoveredCandidates(externalResults, existingCharacters, update
       const item = src.items[j];
       const title = item && item.title ? String(item.title).trim() : '';
       if (!title) continue;
+      if (!isLikelyCharacterCandidate(title)) continue;
       const lowerTitle = title.toLowerCase();
       const candSlug = slugify(title);
       if (knownNames[lowerTitle] || knownSlugs[candSlug] || seenDiscovered[candSlug]) continue;
