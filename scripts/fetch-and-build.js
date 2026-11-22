@@ -4,7 +4,12 @@ const path = require('path');
 const ROOT_DIR = path.join(__dirname, '..');
 const SOURCES_FILE = path.join(ROOT_DIR, 'data', 'sources.json');
 const DISCOVERED_FILE = path.join(ROOT_DIR, 'data', 'discovered-characters.json');
-const PUBLIC_CHARS_DIR = path.join(ROOT_DIR, 'public', 'characters');
+const PUBLIC_DIR = path.join(ROOT_DIR, 'public');
+const PUBLIC_CHARS_DIR = path.join(PUBLIC_DIR, 'characters');
+const SITEMAP_FILE = path.join(PUBLIC_DIR, 'sitemap.xml');
+
+const SITE_BASE_URL = 'https://www.smartchoicelinks.com';
+const HUB_PAGE_PATH = '/marvel-strike-force-character-guides-shard-calculators/';
 
 function ch(code) {
   return String.fromCharCode(code);
@@ -275,6 +280,65 @@ function collectDiscoveredCandidates(externalResults, existingCharacters, update
   return discovered;
 }
 
+function tag(tagName, attrs, innerHtml) {
+  return lt() + tagName + (attrs ? ' ' + attrs : '') + gt() + innerHtml + lt() + '/' + tagName + gt();
+}
+
+function selfTag(tagName, attrs) {
+  return lt() + tagName + (attrs ? ' ' + attrs : '') + ' /' + gt();
+}
+
+function buildSitemapXml(manifest, updatedAtIso) {
+  const Q = q();
+  const baseHubUrl = SITE_BASE_URL + HUB_PAGE_PATH;
+  const entries = [
+    {
+      loc: baseHubUrl,
+      lastmod: updatedAtIso,
+      changefreq: 'daily',
+      priority: '0.9'
+    }
+  ];
+
+  for (let i = 0; i < manifest.length; i++) {
+    const item = manifest[i];
+    if (!item || !item.slug) continue;
+    entries.push({
+      loc: baseHubUrl + '?char=' + encodeURIComponent(item.slug),
+      lastmod: item.updatedAt || updatedAtIso,
+      changefreq: 'daily',
+      priority: '0.8'
+    });
+  }
+
+  const urlBlocks = entries
+    .map(function (entry) {
+      return (
+        '  ' +
+        tag(
+          'url',
+          '',
+          '\n    ' +
+            tag('loc', '', escapeHtml(entry.loc)) +
+            '\n    ' +
+            tag('lastmod', '', escapeHtml(entry.lastmod)) +
+            '\n    ' +
+            tag('changefreq', '', escapeHtml(entry.changefreq)) +
+            '\n    ' +
+            tag('priority', '', escapeHtml(entry.priority)) +
+            '\n  '
+        )
+      );
+    })
+    .join('\n');
+
+  const xmlHeader = lt() + '?xml version=' + Q + '1.0' + Q + ' encoding=' + Q + 'UTF-8' + Q + '?' + gt();
+  const urlsetOpen = lt() + 'urlset xmlns=' + Q + 'http://www.sitemaps.org/schemas/sitemap/0.9' + Q + gt();
+  const urlsetClose = lt() + '/urlset' + gt();
+
+  return xmlHeader + '\n' + urlsetOpen + '\n' + urlBlocks + '\n' + urlsetClose + '\n';
+}
+
 function printBuildSummary(externalResults, manifest, discoveredCandidates, updatedAtIso) {
   console.log('====================================================');
   console.log('MSF BUILD SUMMARY (UTC): ' + updatedAtIso);
@@ -315,19 +379,12 @@ function printBuildSummary(externalResults, manifest, discoveredCandidates, upda
 
   console.log('----------------------------------------------------');
   console.log('Hub Page Built: public/characters/index.html');
+  console.log('Sitemap Built: public/sitemap.xml (' + (manifest.length + 1) + ' URLs)');
   console.log('Character Pages Built: ' + manifest.length);
   for (let k = 0; k < manifest.length; k++) {
     console.log('  - ' + manifest[k].name + ' -> ' + manifest[k].htmlPath);
   }
   console.log('====================================================');
-}
-
-function tag(tagName, attrs, innerHtml) {
-  return lt() + tagName + (attrs ? ' ' + attrs : '') + gt() + innerHtml + lt() + '/' + tagName + gt();
-}
-
-function selfTag(tagName, attrs) {
-  return lt() + tagName + (attrs ? ' ' + attrs : '') + ' /' + gt();
 }
 
 function getSharedCss() {
@@ -774,6 +831,9 @@ async function main() {
   const hubHtml = renderHubHtml(characters, discoveredCandidates, updatedAtIso);
   fs.writeFileSync(path.join(PUBLIC_CHARS_DIR, 'index.html'), hubHtml, 'utf8');
 
+  const sitemapXml = buildSitemapXml(manifest, updatedAtIso);
+  fs.writeFileSync(SITEMAP_FILE, sitemapXml, 'utf8');
+
   fs.writeFileSync(
     DISCOVERED_FILE,
     JSON.stringify(
@@ -793,6 +853,7 @@ async function main() {
       {
         updatedAt: updatedAtIso,
         hubPath: 'public/characters/index.html',
+        sitemapPath: 'public/sitemap.xml',
         externalSources: externalResults,
         discoveredCandidates: discoveredCandidates,
         characters: manifest
