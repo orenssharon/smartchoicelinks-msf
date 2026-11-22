@@ -48,6 +48,35 @@ function replaceCode(inputStr, targetCode, replacement) {
   return out;
 }
 
+function decodeBasicEntities(text) {
+  let s = String(text || '');
+  s = s.split('&').join('&');
+  s = s.split('<').join('<');
+  s = s.split('>').join('>');
+  s = s.split('"').join('"');
+  s = s.split(''').join("'");
+  s = s.split(''').join("'");
+  s = s.split(' ').join(' ');
+  return s;
+}
+
+function stripCdata(text) {
+  let s = String(text || '');
+  const openTag = '<![CDATA[';
+  const closeTag = ']]>';
+  while (s.indexOf(openTag) !== -1) {
+    const startIdx = s.indexOf(openTag);
+    const endIdx = s.indexOf(closeTag, startIdx + openTag.length);
+    if (endIdx === -1) {
+      s = s.slice(0, startIdx) + s.slice(startIdx + openTag.length);
+      break;
+    }
+    const inner = s.slice(startIdx + openTag.length, endIdx);
+    s = s.slice(0, startIdx) + inner + s.slice(endIdx + closeTag.length);
+  }
+  return s;
+}
+
 function escapeHtml(val) {
   let out = replaceCode(val, 38, amp() + 'amp;');
   out = replaceCode(out, 60, amp() + 'lt;');
@@ -87,7 +116,7 @@ function stripTags(htmlChunk) {
       out += c;
     }
   }
-  return out.replace(/\s+/g, ' ').trim();
+  return decodeBasicEntities(out).replace(/\s+/g, ' ').trim();
 }
 
 function isRelevantCandidateText(text) {
@@ -203,6 +232,52 @@ function extractLinksAndTitles(htmlText, baseUrl) {
   return items;
 }
 
+function extractRssItems(xmlText, baseUrl) {
+  const items = [];
+  const seenTitles = {};
+
+  function pushUnique(title, url) {
+    const clean = String(title || '').replace(/\s+/g, ' ').trim();
+    if (!isRelevantCandidateText(clean)) return;
+    const key = clean.toLowerCase();
+    if (seenTitles[key]) return;
+    seenTitles[key] = true;
+    items.push({ title: clean, url: url || baseUrl || '' });
+  }
+
+  const entryRegex = /<(item|entry)\b[^>]*>([\s\S]*?)<\/\1>/gi;
+  let match;
+  let count = 0;
+  while ((match = entryRegex.exec(xmlText)) !== null && count < 40) {
+    const block = match[2];
+    const titleMatch = /<title\b[^>]*>([\s\S]*?)<\/title>/i.exec(block);
+    const rawTitle = titleMatch ? stripTags(stripCdata(titleMatch[1])) : '';
+
+    let linkUrl = '';
+    const linkTagMatch = /<link\b[^>]*>([\s\S]*?)<\/link>/i.exec(block);
+    if (linkTagMatch) {
+      linkUrl = stripTags(stripCdata(linkTagMatch[1]));
+    } else {
+      const atomLinkMatch = /<link\b[^>]*href\s*=\s*["']([^"']+)["']/i.exec(block);
+      if (atomLinkMatch) linkUrl = atomLinkMatch[1].trim();
+    }
+
+    if (linkUrl && linkUrl.indexOf('/') === 0 && baseUrl) {
+      try {
+        linkUrl = new URL(linkUrl, baseUrl).toString();
+      } catch (e) {
+        // keep link as is if resolution fails
+      }
+    }
+
+    const prevLen = items.length;
+    pushUnique(rawTitle, linkUrl);
+    if (items.length > prevLen) count++;
+  }
+
+  return items;
+}
+
 function parseRedditJson(jsonObj) {
   const posts = [];
   const children = jsonObj && jsonObj.data && Array.isArray(jsonObj.data.children)
@@ -257,8 +332,30 @@ async function querySingleEndpoint(ep) {
       };
     }
 
-    const htmlText = await res.text();
-    const extracted = extractLinksAndTitles(htmlText, ep.url);
+    const rawText = await res.text();
+    const trimmedLower = rawText.trim().slice(0, 200).toLowerCase();
+    const isRss =
+      ep.type === 'rss' ||
+      ep.type === 'xml' ||
+      ep.type === 'atom' ||
+      contentType.indexOf('xml') !== -1 ||
+      contentType.indexOf('rss') !== -1 ||
+      trimmedLower.indexOf('<?xml') === 0 ||
+      trimmedLower.indexOf('<rss') !== -1 ||
+      trimmedLower.indexOf('<feed') !== -1;
+
+    if (isRss) {
+      const rssItems = extractRssItems(rawText, ep.url);
+      return {
+        name: ep.name || ep.url,
+        url: ep.url,
+        status: 'ok-rss',
+        itemsCount: rssItems.length,
+        items: rssItems.slice(0, 20)
+      };
+    }
+
+    const extracted = extractLinksAndTitles(rawText, ep.url);
     return {
       name: ep.name || ep.url,
       url: ep.url,
@@ -355,7 +452,7 @@ function buildAutoCharacterEntry(candidate) {
       priceLabel: 'PLACEHOLDER: Price'
     },
     whatCharacterDoes: [
-      'PLACEHOLDER: Auto-discovered from ' + srcLabel + ' — verified abilities and combat role pending confirmation.'
+      'PLACEHOLDER: Auto-discovered from ' + srcLabel + ' - verified abilities and combat role pending confirmation.'
     ],
     bestTeams: [
       {
