@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-11-28T06:57:01.505Z",
+  "updatedAt": "2026-11-28T19:42:45.482Z",
   "hubPath": "public/characters/index.html",
   "sitemapPath": "public/sitemap.xml",
   "autoAddedCount": 0,
@@ -10,7 +10,7 @@
       "name": "Sauron",
       "slug": "should-you-recruit-sauron",
       "autoDiscovered": false,
-      "updatedAt": "2026-11-28T06:57:01.505Z",
+      "updatedAt": "2026-11-28T19:42:45.482Z",
       "htmlPath": "public/characters/should-you-recruit-sauron/index.html"
     }
   ]
